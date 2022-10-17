@@ -23,18 +23,32 @@ CA::MetalLayer* swapchain;
 MTL::Device* device;
 MTL::CommandQueue* queue;
 
+SDL_MetalView view;
+
 void init()
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) > 0)
 		log_error("Error: %s", SDL_GetError());
+
+	
 }
 
 void render()
 {
-	MTL::ClearColor color(0, 0, 0, 1);
-
+	MTL::ClearColor color(0.2, 0.3, 0.4, 1);
+	
 	auto surface = next_drawable(SDL_Metal_GetLayer(view));
+	auto pass_descriptor = MTL::RenderPassDescriptor::alloc()->init();
+	auto attachment = pass_descriptor->colorAttachments()->object(0);
+	attachment->setClearColor(color);
+	attachment->setLoadAction(MTL::LoadActionClear);
+	attachment->setTexture(surface->texture());
 
+	auto buffer = queue->commandBuffer();
+	auto encoder = buffer->renderCommandEncoder(pass_descriptor);
+	encoder->endEncoding();
+	buffer->presentDrawable(surface);
+	buffer->commit();
 }
 
 int main(int argc, char* argv[])
@@ -51,10 +65,11 @@ int main(int argc, char* argv[])
 	window.setDefault();
 	window.create();
 
-	SDL_Renderer *renderer = SDL_CreateRenderer(window.pWindow, -1, SDL_RENDERER_PRESENTVSYNC);
-	swapchain = (CA::MetalLayer*)SDL_RenderGetMetalLayer(renderer);
+	view = SDL_Metal_CreateView(window.pWindow);
+	device = MTL::CreateSystemDefaultDevice();
+	queue = device->newCommandQueue();
 
-
+	assign_device(SDL_Metal_GetLayer(view), device);
 
 	while (bRunning)
 	{
