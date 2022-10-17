@@ -1,5 +1,10 @@
 #include <iostream>
 #include <SDL.h>
+#include <lib/glad/glad.h>
+
+//#include <core/network.h>
+#include "core/log.h"
+#include "core/window.h"
 
 #include <d3d11.h>       // D3D interface
 #include <dxgi.h>        // DirectX driver interface
@@ -13,18 +18,43 @@
 #include <core/network.h>
 
 bool bRunning = true;
+static SDL_GLContext maincontext;
 
 SDL_Event evt;
 SDL_Window* win;
 
-ID3D11Device* device;
-IDXGIDevice* dev;
+Window window;
 
 void init()
 {
-	SDL_Init(SDL_INIT_EVERYTHING);
+	// Initializing SDL2
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+	{
+		log_error("Error: %s", SDL_GetError());
+	}
 
-	win = SDL_CreateWindow("theta2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
+	// Request an OpenGL 4.5 context (should be core)
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE );
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG );
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	// Initializing window
+	window.create();
+
+	//SDL_GL_MakeCurrent(window.pWindow, maincontext);
+
+	maincontext = SDL_GL_CreateContext(window.pWindow);
+	if (maincontext == NULL)
+		log_error("Failed to create OpenGL context");
+
+	// Initializing OpenGL
+	if (!gladLoadGLLoader(SDL_GL_GetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD. " << std::endl;
+	}
 }
 
 void render()
@@ -35,32 +65,35 @@ void render()
 /// Makes game run in 60 fps, calls update functions on different scenes
 int main(int argc, char* argv[])
 {
-#if !OFFLINE
-	net_init();
-#endif
-
 	srand(time(NULL));
 
-	// Variables for keeping game running at 60 fps
+	init();
+
+	// Keeping game running at 60 fps
 	const float MS = 16.6666666666667f;
 	double last = SDL_GetTicks64();
 	double lag = 0.0;
 	double current = 0;
 
-	// enemies
-	//bool test_enemy = enemy_wave_parser();
+	
 
-	init();
-
+	
 	while (bRunning)
 	{
-
 		while (SDL_PollEvent(&evt) != 0)
 		{
 			switch (evt.type)
 			{
+			case SDL_KEYDOWN:
+				if (evt.key.keysym.sym == SDLK_ESCAPE)
+				{
+					bRunning = false;
+					window.close();
+				}
+				break;
 			case SDL_QUIT:
 				bRunning = false;
+				window.close();
 				break;
 			case SDL_CONTROLLERDEVICEADDED:
 				//input_notify_pad_added();
@@ -78,8 +111,7 @@ int main(int argc, char* argv[])
 		last = current;
 		lag += dt;
 
-		// spowalniamy giere jak za szybko dziala
-		// tldr: ma byc 60 fps(16.6ms) i koniec kropka
+
 		while (lag < MS)
 		{
 			int milliseconds = (int)(MS - lag);
@@ -97,6 +129,12 @@ int main(int argc, char* argv[])
 			lag -= MS;
 		}
 
+		glClearColor(.2f, .5f, .0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+
+
+		SDL_GL_SwapWindow(window.pWindow);
 		//input_update();
 		//audio_update();
 		render();
@@ -105,6 +143,5 @@ int main(int argc, char* argv[])
 #endif
 	}
 
-	net_shutdown();
 	return 0;
 }

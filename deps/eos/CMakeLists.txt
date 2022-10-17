@@ -12,8 +12,8 @@ set_property(TARGET eos PROPERTY
 
 
 elseif(APPLE)
-set_property(TARGET fmod PROPERTY
-             IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/mac/core/lib/libfmod.dylib")
-set_property(TARGET fmod PROPERTY
-             INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/mac/core/inc")
+set_property(TARGET eos PROPERTY
+             IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/win/SDK/Bin/libEOSSDK-Mac-Shipping.dylib")
+set_property(TARGET eos PROPERTY
+             INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/win/SDK/Include")
 endif()

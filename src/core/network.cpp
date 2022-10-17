@@ -40,7 +40,7 @@ void prompt_epic_login()
 
 	log.ApiVersion = EOS_AUTH_LOGIN_API_LATEST;
 	log.Credentials = &creds;
-	log.ScopeFlags = EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence;
+	log.ScopeFlags = (EOS_EAuthScopeFlags)(EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence);
 
 
 	EOS_Auth_Login(auth, &log, NULL, &auth_cb);
@@ -206,7 +206,7 @@ void net_login()
 
 	log.ApiVersion = EOS_AUTH_LOGIN_API_LATEST;
 	log.Credentials = &creds;
-	log.ScopeFlags = EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence;
+	log.ScopeFlags = (EOS_EAuthScopeFlags)(EOS_EAuthScopeFlags::EOS_AS_BasicProfile | EOS_EAuthScopeFlags::EOS_AS_FriendsList | EOS_EAuthScopeFlags::EOS_AS_Presence);
 
 	EOS_Auth_Login(auth, &log, NULL, &auth_cb);
 }
