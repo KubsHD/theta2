@@ -3,6 +3,8 @@ project(theta2)
 
 include(FetchContent)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(BUILD_SHARED_LIBS FALSE)
 set(FETCHCONTENT_UPDATES_DISCONNECTED ON CACHE STRING "don't update every time")
 set(CPPWINRT_REQUIRED_COMPILER_FLAGS "/std:c++latest /await")
@@ -33,7 +35,7 @@ target_compile_definitions(theta2 PRIVATE _CRT_SECURE_NO_WARNINGS=1)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(theta2 PRIVATE DEBUG=1)
 else()
-    add_custom_command(TARGET theta2 POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:theta2>/data
-    COMMENT "Copying assets")
+    # add_custom_command(TARGET theta2 POST_BUILD
+    # COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:theta2>/data
+    # COMMENT "Copying assets")
 endif()

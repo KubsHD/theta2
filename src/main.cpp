@@ -1,9 +1,16 @@
 #include <iostream>
 #include <SDL.h>
 
+#define NS_PRIVATE_IMPLEMENTATION
+#define MTL_PRIVATE_IMPLEMENTATION
+#define CA_PRIVATE_IMPLEMENTATION
+#include <lib/Metal.hpp>
+
 //#include <core/network.h>
 #include "core/log.h"
 #include "core/window.h"
+
+#include "platform/macos/metal_helper.h"
 
 bool bRunning = true;
 
@@ -12,6 +19,9 @@ SDL_Window* win;
 
 Window window;
 
+CA::MetalLayer* swapchain;
+MTL::Device* device;
+MTL::CommandQueue* queue;
 
 void init()
 {
@@ -19,6 +29,13 @@ void init()
 		log_error("Error: %s", SDL_GetError());
 }
 
+void render()
+{
+	MTL::ClearColor color(0, 0, 0, 1);
+
+	auto surface = next_drawable(SDL_Metal_GetLayer(view));
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -34,7 +51,11 @@ int main(int argc, char* argv[])
 	window.setDefault();
 	window.create();
 
-	
+	SDL_Renderer *renderer = SDL_CreateRenderer(window.pWindow, -1, SDL_RENDERER_PRESENTVSYNC);
+	swapchain = (CA::MetalLayer*)SDL_RenderGetMetalLayer(renderer);
+
+
+
 	while (bRunning)
 	{
 		while (SDL_PollEvent(&evt) != 0)
@@ -89,7 +110,7 @@ int main(int argc, char* argv[])
 
 		//input_update();
 		//audio_update();
-		//render();
+		render();
 	}
 
 	return 0;

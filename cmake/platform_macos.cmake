@@ -6,7 +6,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(SDL)
 
-set(game_src_paths "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.h" "${PROJECT_SOURCE_DIR}/src/*.rc" "${PROJECT_SOURCE_DIR}/src/*.cur")
+set(game_src_paths "${PROJECT_SOURCE_DIR}/src/*.cpp" "${PROJECT_SOURCE_DIR}/src/*.h" "${PROJECT_SOURCE_DIR}/src/*.hpp" "${PROJECT_SOURCE_DIR}/src/*.rc" "${PROJECT_SOURCE_DIR}/src/*.cur")
 file(GLOB_RECURSE game_SRC ${game_src_paths})
 
 set_source_files_properties(game_SRC PROPERTIES LANGUAGE CXX)
@@ -30,10 +30,10 @@ target_compile_definitions(theta2 PRIVATE APPLE=1)
 target_include_directories(theta2 PUBLIC "${PROJECT_SOURCE_DIR}/src")
 
 # copy dlls
-add_custom_command(
-    TARGET theta2 POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:theta2> $<TARGET_FILE_DIR:theta2>
-    COMMAND_EXPAND_LISTS
-)
+# add_custom_command(
+#     TARGET theta2 POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:theta2> $<TARGET_FILE_DIR:theta2>
+#     COMMAND_EXPAND_LISTS
+# )
 
 set(game_libs "glm" "fmod" "SDL2main" "SDL2-static" "eos")

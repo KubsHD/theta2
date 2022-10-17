@@ -1,4 +1,5 @@
 #include "window.h"
+#include <lib/Metal.hpp>
 
 void Window::setDefault()
 {
