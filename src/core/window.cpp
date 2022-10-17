@@ -14,7 +14,7 @@ void Window::create()
 {
 	// Create window and get its surface
 	pWindow = SDL_CreateWindow("Ozon", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		w, h, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+		w, h, SDL_WINDOW_SHOWN);
 
 	if (pWindow == NULL)
 	{
