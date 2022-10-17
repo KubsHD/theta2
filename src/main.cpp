@@ -1,6 +1,15 @@
 #include <iostream>
 #include <SDL.h>
 
+#include <d3d11.h>       // D3D interface
+#include <dxgi.h>        // DirectX driver interface
+#include <d3dcompiler.h> // shader compiler
+
+#pragma comment( lib, "user32" )          // link against the win32 library
+#pragma comment( lib, "d3d11.lib" )       // direct3D library
+#pragma comment( lib, "dxgi.lib" )        // directx graphics interface
+#pragma comment( lib, "d3dcompiler.lib" ) // shader compiler
+
 #include <core/network.h>
 
 bool bRunning = true;
@@ -8,11 +17,19 @@ bool bRunning = true;
 SDL_Event evt;
 SDL_Window* win;
 
+ID3D11Device* device;
+IDXGIDevice* dev;
+
 void init()
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 
 	win = SDL_CreateWindow("theta2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
+}
+
+void render()
+{
+
 }
 
 /// Makes game run in 60 fps, calls update functions on different scenes
@@ -82,7 +99,7 @@ int main(int argc, char* argv[])
 
 		//input_update();
 		//audio_update();
-		//render();
+		render();
 #if !OFFLINE
 		net_update();
 #endif
