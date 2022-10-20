@@ -23,6 +23,8 @@ CA::MetalLayer* swapchain;
 MTL::Device* device;
 MTL::CommandQueue* queue;
 
+MTL::Buffer* vb;
+
 SDL_MetalView view;
 
 void init()
@@ -30,6 +32,13 @@ void init()
 	if (SDL_Init(SDL_INIT_EVERYTHING) > 0)
 		log_error("Error: %s", SDL_GetError());
 
+
+	double vertexData[] = {
+		0.0,  1.0, 0.0,
+		-1.0, -1.0, 0.0,
+		1.0, -1.0, 0.0
+	};
+	vb = device->newBuffer(vertexData, sizeof(vertexData) * sizeof(double), NULL);
 	
 }
 
@@ -43,6 +52,8 @@ void render()
 	attachment->setClearColor(color);
 	attachment->setLoadAction(MTL::LoadActionClear);
 	attachment->setTexture(surface->texture());
+
+
 
 	auto buffer = queue->commandBuffer();
 	auto encoder = buffer->renderCommandEncoder(pass_descriptor);
