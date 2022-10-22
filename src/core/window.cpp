@@ -2,6 +2,7 @@
 
 Window::Window()
 {
+
 	// Initialize and set window variables to default values
 	quit = false;
 	x = 0;
@@ -13,6 +14,7 @@ Window::Window()
 void Window::create()
 {
 	// Create window and get its surface
+
 	pWindow = SDL_CreateWindow("Ozon", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		w, h, SDL_WINDOW_SHOWN);
 

@@ -7,7 +7,7 @@
 #include "core/log.h"
 #include "core/window.h"
 
-#include <d3d11.h>       // D3D interface
+#include <d3d11_1.h> // D3D interface
 #include <dxgi.h>        // DirectX driver interface
 #include <d3dcompiler.h> // shader compiler
 
@@ -41,14 +41,17 @@ D3D11_VIEWPORT vp;
 
 ID3D11InputLayout* lay;
 
-constexpr D3D11_INPUT_ELEMENT_DESC vertexInputLayoutInfo[] =
+
+ID3D11Debug* dbg;
+
+D3D11_INPUT_ELEMENT_DESC vertexInputLayoutInfo[] =
 {
 	{
 		"TEXCOORD",
 		0,
 		DXGI_FORMAT::DXGI_FORMAT_R32G32B32_FLOAT,
 		0,
-		D3D11_APPEND_ALIGNED_ELEMENT,
+		0,
 		D3D11_INPUT_CLASSIFICATION::D3D11_INPUT_PER_VERTEX_DATA,
 		0
 	},
@@ -90,6 +93,8 @@ void init()
 	swap_chain_descr.BufferCount = 1;
 	swap_chain_descr.OutputWindow = wmInfo.info.win.window;
 	swap_chain_descr.Windowed = true;
+	swap_chain_descr.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swap_chain_descr.Flags = 0;
 
 	D3D11CreateDeviceAndSwapChain(
 		NULL,
@@ -112,25 +117,33 @@ void init()
 		__uuidof(ID3D11Texture2D),
 		(void**)&framebuffer);
 
-	device->CreateRenderTargetView(framebuffer, 0, &render_target_view_ptr);
+	device->CreateRenderTargetView(framebuffer, nullptr, &render_target_view_ptr);
 
-
+	ID3DBlob* err;
 	ID3DBlob* blob;
-	D3DReadFileToBlob(L"test_default_hlsl5_fs.fxc", &blob);
-	device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), NULL, &frag);
+
+
+	//OutputDebugStringA((char*)err->GetBufferPointer());
+	D3DReadFileToBlob(L"data/shader/default_default_hlsl5_fs.fxc", &blob);
+	device->CreatePixelShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &frag);
 	
-	D3DReadFileToBlob(L"test_default_hlsl5_vs.fxc", &blob);
-	device->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), NULL, &vert);
+
+
+
+
+
+	D3DReadFileToBlob(L"data/shader/default_default_hlsl5_vs.fxc", &blob);
+	device->CreateVertexShader(blob->GetBufferPointer(), blob->GetBufferSize(), nullptr, &vert);
 
 
 	constexpr float vertices[] =
 	{
-		 0.0f, 0.5f, 0.0f, 0.25f, 0.39f, 0.19f, 
+		 0.0f, 0.5f, 0.0f, 0.25f, 0.8f, 0.19f, 
 		 0.5f, -0.5f, 0.0f,  0.44f, 0.75f, 0.35f, 
 		-0.5f, -0.5f, 0.0f, 0.38f, 0.55f, 0.20f, 
 	};
 
-	device->CreateInputLayout(vertexInputLayoutInfo, _countof(vertexInputLayoutInfo), blob->GetBufferPointer(), blob->GetBufferSize(), &lay);
+	device->CreateInputLayout(vertexInputLayoutInfo, ARRAYSIZE(vertexInputLayoutInfo), blob->GetBufferPointer(), blob->GetBufferSize(), &lay);
 
 	D3D11_BUFFER_DESC bufferInfo = {};
 	bufferInfo.ByteWidth = sizeof(vertices);
@@ -140,7 +153,6 @@ void init()
 	D3D11_SUBRESOURCE_DATA dat = {};
 	dat.pSysMem = vertices;
 	device->CreateBuffer(&bufferInfo, &dat, &vertexBuffer);
-
 
 	vp.Width = (float)640;
 	vp.Height = (float)480;
@@ -162,13 +174,14 @@ void render()
 	deviceCtx->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &vertexOffset);
 	deviceCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceCtx->RSSetViewports(1, &vp);
-	deviceCtx->VSSetShader(vert, NULL, 0);
-	deviceCtx->PSSetShader(frag, NULL, 0);
-	deviceCtx->OMSetRenderTargets(1, &render_target_view_ptr, NULL);
+	deviceCtx->VSSetShader(vert, nullptr, 0);
+	deviceCtx->PSSetShader(frag, nullptr, 0);
+	deviceCtx->OMSetRenderTargets(1, &render_target_view_ptr, nullptr);
+	deviceCtx->OMSetBlendState(nullptr, nullptr, 0xffffffff); // use default blend mode (i.e. disable)
 
 	deviceCtx->Draw(3, 0);
 
-	swap_chain_ptr->Present(0, 0);
+	swap_chain_ptr->Present(1, 0);
 }
 
 /// Makes game run in 60 fps, calls update functions on different scenes

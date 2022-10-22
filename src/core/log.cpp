@@ -8,6 +8,7 @@
 #include <Windows.h>
 #endif
 
+
 void log_info(const char* str, ...)
 {
 	char msg[5000];

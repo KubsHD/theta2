@@ -10,6 +10,7 @@ public:
 	bool fullscreen;
 	bool quit;
 	SDL_Window* pWindow;
+
 	SDL_Surface* pSurface;
 
 	Window();

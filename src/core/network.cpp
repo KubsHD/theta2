@@ -234,6 +234,7 @@ void net_stat_send_endscore(int val)
 	opts.StatsCount = 1;
 	opts.Stats = &dat;
 	opts.TargetUserId = user_id;
+
 	opts.LocalUserId = user_id;
 
 

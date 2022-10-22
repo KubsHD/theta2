@@ -36,4 +36,28 @@ add_custom_command(
     COMMAND_EXPAND_LISTS
 )
 
+add_custom_command(
+    TARGET theta2 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/data $<TARGET_FILE_DIR:theta2>/data
+    COMMENT "Copying assets"
+)
+
+
+
+add_custom_command(
+    OUTPUT ${PROJECT_BINARY_DIR}/data/shader/default_default_hlsl5_fs.fxc
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/sokol-shdc.exe --input ${PROJECT_SOURCE_DIR}/data/shader/default.tsh --output $<TARGET_FILE_DIR:theta2>/data/shader/default --slang hlsl5 -b -f bare
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/sokol-shdc.exe --input ${PROJECT_SOURCE_DIR}/data/shader/default.tsh --output $<TARGET_FILE_DIR:theta2>/data/shader/default --slang hlsl5 -f bare
+    COMMAND ${CMAKE_SOURCE_DIR}/tools/sokol-shdc.exe --input ${PROJECT_SOURCE_DIR}/data/shader/default.tsh --output $<TARGET_FILE_DIR:theta2>/data/shader/default --slang hlsl5 -f sokol_impl
+    COMMAND_EXPAND_LISTS
+)
+
+add_custom_target(
+   CompileShaders 
+   ALL
+   DEPENDS ${PROJECT_BINARY_DIR}/data/shader/default_default_hlsl5_fs.fxc
+)
+
+add_dependencies(theta2 CompileShaders)
+
 set(game_libs "glm" "fmod" "SDL2main" "SDL2-static" "eos")
