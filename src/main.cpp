@@ -1,4 +1,5 @@
-#include <iostream>
+﻿#include <iostream>
+#include <stdio.h>
 #include <SDL.h>
 
 #define NS_PRIVATE_IMPLEMENTATION
@@ -22,7 +23,8 @@ Window window;
 CA::MetalLayer* swapchain;
 MTL::Device* device;
 MTL::CommandQueue* queue;
-
+MTL::Library* lib;
+MTL::RenderPipelineState* pipelineState;
 MTL::Buffer* vb;
 
 SDL_MetalView view;
@@ -33,13 +35,48 @@ void init()
 		log_error("Error: %s", SDL_GetError());
 
 
-	double vertexData[] = {
-		0.0,  1.0, 0.0,
-		-1.0, -1.0, 0.0,
-		1.0, -1.0, 0.0
+
+	const char* shaderSrc = R"(
+        #include <metal_stdlib>
+        using namespace metal;
+
+        float4 vertex vs_main( uint vid [[vertex_id]],
+                               device const float3* positions [[buffer(0)]]
+                                )
+        {
+            return float4(positions[vid], 1.0);
+        }
+
+        half4 fragment fs_main( )
+        {
+            return half4(1.0);
+        }
+    )";
+
+	float vertexData[] =
+    {
+         -0.8f,  0.8f, 0.0f,
+          0.0f, -0.8f, 0.0f,
+          0.8f,  0.8f, 0.0f
 	};
-	vb = device->newBuffer(vertexData, sizeof(vertexData) * sizeof(double), NULL);
-	
+
+	vb = device->newBuffer(vertexData, sizeof(vertexData) * sizeof(float), MTL::ResourceStorageModeManaged);
+	NS::Error* err;
+	lib = device->newLibrary( NS::String::string(shaderSrc, NS::StringEncoding::UTF8StringEncoding), nullptr, &err);
+	if ( !lib )
+    {
+        log_error( "%s", err->localizedDescription()->utf8String() );
+        assert( false );
+    }
+
+	MTL::RenderPipelineDescriptor* pDesc = MTL::RenderPipelineDescriptor::alloc()->init();
+
+	pDesc->setVertexFunction(lib->newFunction(NS::String::string("vs_main", NS::StringEncoding::UTF8StringEncoding)));
+	pDesc->setFragmentFunction(lib->newFunction(NS::String::string("fs_main", NS::StringEncoding::UTF8StringEncoding)));
+    pDesc->colorAttachments()->object(0)->setPixelFormat( MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB );
+
+	pipelineState = device->newRenderPipelineState(pDesc, &err);
+	log_error( "%s", err->localizedDescription()->utf8String() );
 }
 
 void render()
@@ -55,9 +92,16 @@ void render()
 
 
 
+
 	auto buffer = queue->commandBuffer();
 	auto encoder = buffer->renderCommandEncoder(pass_descriptor);
+
+	encoder->setRenderPipelineState(pipelineState);
+	encoder->setVertexBuffer(vb, 0, 0);
+	encoder->drawPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, NS::Integer(0), NS::Integer(3));
+
 	encoder->endEncoding();
+
 	buffer->presentDrawable(surface);
 	buffer->commit();
 }
@@ -65,7 +109,6 @@ void render()
 int main(int argc, char* argv[])
 {
 	srand(time(NULL));
-	init();
 
 	// Keeping game running at 60 fps
 	const float MS = 16.6666666666667f;
@@ -78,9 +121,12 @@ int main(int argc, char* argv[])
 
 	view = SDL_Metal_CreateView(window.pWindow);
 	device = MTL::CreateSystemDefaultDevice();
+	assign_device(SDL_Metal_GetLayer(view), device);
 	queue = device->newCommandQueue();
 
-	assign_device(SDL_Metal_GetLayer(view), device);
+
+	init();
+
 
 	while (bRunning)
 	{
